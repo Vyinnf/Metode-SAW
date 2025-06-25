@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Rekomendasi Laptop Modern</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glow-size: 600px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617; /* Slate 950 */
+            color: #e2e8f0; /* Slate 200 */
+            overflow-x: hidden;
+        }
+
+        /* --- Main Aurora Card Effect --- */
+        .aurora-card {
+            position: relative;
+            background-color: rgba(15, 23, 42, 0.6); /* Slate 900 with 60% opacity */
+            border: 1px solid rgba(51, 65, 85, 0.5); /* Slate 700 with 50% opacity */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden; /* Important for the pseudo-element */
+        }
+
+        .aurora-card::before {
+            content: '';
+            position: absolute;
+            left: var(--x);
+            top: var(--y);
+            width: var(--glow-size);
+            height: var(--glow-size);
+            background-image: radial-gradient(circle at center, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0) 60%);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            pointer-events: none; /* Make sure it doesn't block interactions */
+        }
+
+        .aurora-card:hover::before {
+            opacity: 1;
+        }
+
+        /* --- Animation Keyframes --- */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- Animation Utility Classes --- */
+        .animate-in {
+            opacity: 0;
+            animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        .title-animate {
+             opacity: 0;
+             animation: fadeInDown 0.8s ease-out forwards;
+        }
+
+        /* --- Custom UI Element Styling --- */
+        .formula {
+            font-family: 'Roboto Mono', monospace;
+            background-color: rgba(30, 41, 59, 0.7); /* Slate 800 with transparency */
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #93c5fd; /* Blue 300 */
+            border: 1px solid #334155; /* Slate 700 */
+            transition: background-color 0.2s;
+        }
+        .formula:hover {
+            background-color: rgba(51, 65, 85, 0.9);
+        }
+
+        .scrollable-table-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 0.75rem; /* Slightly larger radius */
+            border: 1px solid #1e293b; /* Slate 800 */
+        }
+        
+        /* Custom scrollbar for a modern look */
+        .scrollable-table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .scrollable-table-container::-webkit-scrollbar-track {
+            background: #1e293b; /* Slate 800 */
+        }
+        .scrollable-table-container::-webkit-scrollbar-thumb {
+            background: #475569; /* Slate 600 */
+            border-radius: 4px;
+        }
+        .scrollable-table-container::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* Slate 500 */
+        }
+
+        /* Modern Table Styling */
+        .modern-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .modern-table th {
+            background-color: rgba(15, 23, 42, 0.8); /* Slate 900 with transparency */
+            color: #94a3b8; /* Slate 400 */
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .modern-table td, .modern-table th {
+             padding: 16px 24px;
+             text-align: left;
+        }
+        .modern-table tbody tr {
+            border-bottom: 1px solid #1e293b; /* Slate 800 */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .modern-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        .modern-table tbody tr:hover {
+            background-color: rgba(30, 41, 59, 0.5); /* Slate 800 / 50% */
+        }
+        
+        .rank-highlight-1 {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), transparent 70%);
+        }
+        .rank-highlight-2 {
+            background: linear-gradient(90deg, rgba(34, 197, 94, 0.15), transparent 70%);
+        }
+         .rank-highlight-3 {
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.15), transparent 70%);
+        }
+
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+    <div id="auroraCard" class="aurora-card rounded-2xl shadow-2xl max-w-6xl w-full my-12">
+        <div class="p-8 md:p-12">
+
+            <!-- Header Section -->
+            <div class="text-center mb-12">
+                <h1 class="title-animate text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 text-transparent bg-clip-text" style="animation-delay: 0.1s;">
+                    Sistem Rekomendasi Laptop
+                </h1>
+                <p class="animate-in text-lg md:text-xl text-slate-400 max-w-3xl mx-auto" style="animation-delay: 0.2s;">
+                    Temukan laptop ideal Anda menggunakan metode <strong class="text-blue-300 font-semibold">Simple Additive Weighting (SAW)</strong> untuk peringkat yang presisi dan transparan.
+                </p>
+            </div>
+
+            <!-- Criteria Explanation Section -->
+            <div class="animate-in bg-slate-900/50 border border-slate-800 rounded-lg p-6 mb-10" style="animation-delay: 0.4s;">
+                 <p class="font-bold text-lg mb-4 text-slate-200">Penjelasan Kriteria:</p>
+                 <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-slate-300">
+                     <li><strong class="font-semibold text-slate-100">C1: Harga</strong> - Lebih rendah lebih baik (<span class="text-red-400">Cost</span>)</li>
+                     <li><strong class="font-semibold text-slate-100">C2: CPU Score</strong> - Lebih tinggi lebih baik (<span class="text-green-400">Benefit</span>)</li>
+                     <li><strong class="font-semibold text-slate-100">C3: RAM (GB)</strong> - Lebih besar lebih baik (<span class="text-green-400">Benefit</span>)</li>
+                     <li><strong class="font-semibold text-slate-100">C4: Baterai (Jam)</strong> - Lebih lama lebih baik (<span class="text-green-400">Benefit</span>)</li>
+                     <li><strong class="font-semibold text-slate-100">C5: Bobot (Kg)</strong> - Lebih ringan lebih baik (<span class="text-red-400">Cost</span>)</li>
+                     <li><strong class="font-semibold text-slate-100">C6: Kualitas</strong> - Lebih tinggi lebih baik (<span class="text-green-400">Benefit</span>)</li>
+                 </ul>
+            </div>
+            
+            <!-- Steps Sections -->
+            <div class="space-y-10">
+                <div class="animate-in" style="animation-delay: 0.5s;">
+                    <h2 class="text-3xl font-bold text-slate-100 mb-4">Langkah 1 & 2: Data Awal & Bobot</h2>
+                    <div class="text-lg space-y-2 text-slate-300">
+                        <p><strong class="font-semibold text-slate-100">Alternatif (A):</strong> 20 model laptop (A1 - A20).</p>
+                        <p><strong class="font-semibold text-slate-100">Bobot (W):</strong> <span id="displayWeights" class="font-mono text-blue-300 text-base"></span></p>
+                    </div>
+                </div>
+
+                <div class="animate-in" style="animation-delay: 0.6s;">
+                    <h2 class="text-3xl font-bold text-slate-100 mb-4">Langkah 3a: Matriks Keputusan (X)</h2>
+                    <div class="scrollable-table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Kode</th><th>Alternatif</th><th>C1 (Harga)</th><th>C2 (CPU)</th>
+                                    <th>C3 (RAM)</th><th>C4 (Baterai)</th><th>C5 (Bobot)</th><th>C6 (Kualitas)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="decisionMatrixTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="minMaxValues" class="mt-4 p-4 bg-slate-900/50 rounded-md text-sm text-slate-300 border border-slate-800"></div>
+                </div>
+
+                <div class="animate-in" style="animation-delay: 0.7s;">
+                    <h2 class="text-3xl font-bold text-slate-100 mb-4">Langkah 3b: Normalisasi (Matriks R)</h2>
+                    <p class="mb-4 text-slate-400">Rumus: <strong class="text-green-400">Benefit</strong>: <code class="formula">rij = xij / max(xij)</code>, <strong class="text-red-400">Cost</strong>: <code class="formula">rij = min(xij) / xij</code></p>
+                    <div class="scrollable-table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Kode</th><th>C1</th><th>C2</th><th>C3</th>
+                                    <th>C4</th><th>C5</th><th>C6</th>
+                                </tr>
+                            </thead>
+                            <tbody id="normalizedMatrixTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="animate-in" style="animation-delay: 0.8s;">
+                    <h2 class="text-3xl font-bold text-slate-100 mb-4">Langkah 4: Perankingan (Nilai Preferensi V)</h2>
+                    <p class="mb-4 text-slate-400">Rumus: <code class="formula">Vi = &sum;(wj &middot; rij)</code></p>
+                    <ul id="preferenceValuesList" class="space-y-3 text-base text-slate-300"></ul>
+                </div>
+
+                <!-- Final Result Section -->
+                <div class="animate-in" style="animation-delay: 0.9s;">
+                    <h2 class="text-4xl font-extrabold text-center mb-6 bg-gradient-to-r from-blue-400 to-indigo-400 text-transparent bg-clip-text">
+                        Hasil Akhir Peringkat Laptop
+                    </h2>
+                    <div class="scrollable-table-container shadow-2xl">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Peringkat</th><th>Kode</th><th>Nama Laptop</th><th>Skor Akhir (V)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody"></tbody>
+                        </table>
+                    </div>
+                    <p id="conclusionText" class="mt-8 text-lg text-center p-6 bg-slate-900/50 rounded-lg border border-slate-800 text-slate-300"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data (Unchanged from original) ---
+        const alternatif = [
+            "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10",
+            "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A18", "A19", "A20"
+        ];
+        const nama_laptop = [
+            "Apple MacBook Pro 14 (M3 Pro)", "Apple MacBook Air 15 (M3)", "Dell XPS 15 (Ultra 7)",
+            "Dell XPS 13 (Ultra 7)", "Lenovo ThinkPad P1 Gen 6", "Lenovo ThinkPad X1 Carbon G12",
+            "Lenovo Yoga Slim 7 Pro (Ryzen 7)", "HP Spectre x360 14", "HP ZBook Firefly 14 G10",
+            "Asus Zenbook Duo (2024)", "Asus ROG Zephyrus G14", "Razer Blade 14",
+            "Microsoft Surface Laptop Studio 2", "Samsung Galaxy Book4 Pro", "Dell Alienware m16 R2",
+            "Apple MacBook Pro 16 (M3 Max)", "Lenovo Legion Slim 5", "HP Omen Transcend 14",
+            "Asus ProArt Studiobook 16", "Gigabyte AERO 14 OLED"
+        ];
+        const X = [
+            [35.0, 12500, 18, 15, 1.55, 9], [25.0, 10500, 16, 16, 1.51, 8], [33.0, 11800, 32, 10, 1.90, 9],
+            [26.0, 11500, 16, 12, 1.19, 8], [40.0, 13000, 32, 8, 1.78, 9], [38.0, 12100, 32, 14, 1.09, 10],
+            [22.0, 11000, 16, 13, 1.45, 7], [29.0, 11600, 16, 11, 1.36, 9], [34.0, 12200, 32, 9, 1.40, 8],
+            [36.0, 13200, 32, 9, 1.65, 9], [30.0, 13500, 16, 10, 1.60, 8], [42.0, 13800, 16, 8, 1.84, 9],
+            [45.0, 13400, 32, 7, 1.98, 9], [28.0, 11700, 16, 12, 1.23, 8], [48.0, 14500, 32, 6, 2.50, 8],
+            [60.0, 15000, 36, 18, 2.10, 10], [24.0, 12800, 16, 9, 2.20, 7], [27.0, 12400, 16, 10, 1.63, 8],
+            [55.0, 14800, 32, 7, 2.40, 10], [29.5, 12600, 16, 11, 1.49, 9]
+        ];
+        const W = [0.25, 0.30, 0.20, 0.10, 0.10, 0.05];
+        const jenis_kriteria = [0, 1, 1, 1, 0, 1]; // 0 = Cost, 1 = Benefit
+
+        // --- Core Calculation Logic (Unchanged) ---
+        function calculateRanking() {
+            const numAlternatives = X.length;
+            const numCriteria = X[0].length;
+
+            document.getElementById("displayWeights").textContent = '[' + W.join(', ') + ']';
+
+            const decisionMatrixTableBody = document.getElementById("decisionMatrixTableBody");
+            decisionMatrixTableBody.innerHTML = "";
+            X.forEach((row, i) => {
+                const tr = document.createElement("tr");
+                let rowHtml = `
+                    <td class="font-medium text-slate-300">${alternatif[i]}</td>
+                    <td class="text-slate-400">${nama_laptop[i]}</td>`;
+                row.forEach(val => {
+                    rowHtml += `<td class="text-slate-400 font-mono">${val}</td>`;
+                });
+                tr.innerHTML = rowHtml;
+                decisionMatrixTableBody.appendChild(tr);
+            });
+
+            const minMaxValuesDiv = document.getElementById("minMaxValues");
+            minMaxValuesDiv.innerHTML = "<p class='font-bold text-slate-200 mb-2'>Nilai Rujukan (Min/Max):</p>";
+            const criteriaNames = ["Harga", "CPU", "RAM", "Baterai", "Bobot", "Kualitas"];
+            let minMaxHtml = "<ul class='grid grid-cols-2 md:grid-cols-3 gap-2'>";
+            for (let j = 0; j < numCriteria; j++) {
+                const colValues = X.map(row => row[j]);
+                const maxVal = Math.max(...colValues);
+                const minVal = Math.min(...colValues);
+                const type = jenis_kriteria[j] === 1 ? 'Max' : 'Min';
+                const value = jenis_kriteria[j] === 1 ? maxVal : minVal;
+                minMaxHtml += `<li><strong class="font-medium text-slate-300">C${j+1}</strong>: ${type} = <span class="font-mono text-blue-300">${value}</span></li>`;
+            }
+            minMaxHtml += "</ul>";
+            minMaxValuesDiv.innerHTML += minMaxHtml;
+
+            let R = Array(numAlternatives).fill(0).map(() => Array(numCriteria).fill(0));
+            const normalizationFormulas = Array(numAlternatives).fill(0).map(() => Array(numCriteria).fill(''));
+            for (let j = 0; j < numCriteria; j++) {
+                const colValues = X.map(row => row[j]);
+                const maxVal = Math.max(...colValues);
+                const minVal = Math.min(...colValues);
+                for (let i = 0; i < numAlternatives; i++) {
+                    if (jenis_kriteria[j] === 1) { // Benefit
+                        R[i][j] = X[i][j] / maxVal;
+                        normalizationFormulas[i][j] = `${X[i][j]} / ${maxVal}`;
+                    } else { // Cost
+                        R[i][j] = minVal / X[i][j];
+                        normalizationFormulas[i][j] = `${minVal} / ${X[i][j]}`;
+                    }
+                }
+            }
+
+            const normalizedMatrixTableBody = document.getElementById("normalizedMatrixTableBody");
+            normalizedMatrixTableBody.innerHTML = "";
+            X.forEach((row, i) => {
+                const tr = document.createElement("tr");
+                let rowHtml = `<td class="font-medium text-slate-300">${alternatif[i]}</td>`;
+                for (let j = 0; j < numCriteria; j++) {
+                    rowHtml += `<td class="text-slate-400">
+                        <div class="flex flex-col items-start">
+                           <span class="text-xs text-slate-500 font-mono">${normalizationFormulas[i][j]}</span>
+                           <strong class="text-slate-300">${R[i][j].toFixed(4)}</strong>
+                        </div>
+                    </td>`;
+                }
+                tr.innerHTML = rowHtml;
+                normalizedMatrixTableBody.appendChild(tr);
+            });
+
+            let V = Array(numAlternatives).fill(0);
+            let df_hasil = [];
+            const preferenceValuesList = document.getElementById("preferenceValuesList");
+            preferenceValuesList.innerHTML = "";
+            for (let i = 0; i < numAlternatives; i++) {
+                let currentV = 0;
+                let formulaString = [];
+                for (let j = 0; j < numCriteria; j++) {
+                    currentV += R[i][j] * W[j];
+                    formulaString.push(`(${R[i][j].toFixed(3)}*${W[j]})`);
+                }
+                V[i] = currentV;
+
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `<strong class="font-semibold text-slate-200">${alternatif[i]}</strong>: <code class="formula text-xs">${formulaString.join(' + ')}</code> = <strong class="text-blue-300">${V[i].toFixed(4)}</strong>`;
+                preferenceValuesList.appendChild(listItem);
+
+                df_hasil.push({
+                    Kode: alternatif[i], "Nama Laptop": nama_laptop[i], "Skor Akhir (V)": V[i]
+                });
+            }
+
+            df_hasil.sort((a, b) => b["Skor Akhir (V)"] - a["Skor Akhir (V)"]);
+            df_hasil = df_hasil.map((item, index) => ({ Peringkat: index + 1, ...item }));
+            
+            displayResults(df_hasil);
+
+            const conclusionText = document.getElementById("conclusionText");
+             if (df_hasil.length > 1) {
+                const bestLaptop = df_hasil[0];
+                conclusionText.innerHTML = `<strong>Kesimpulan:</strong> Berdasarkan analisis, <strong class="text-blue-300">${bestLaptop["Nama Laptop"]} (${bestLaptop["Kode"]})</strong> menjadi rekomendasi utama dengan skor tertinggi <strong class="font-mono text-blue-300">${bestLaptop["Skor Akhir (V)"].toFixed(4)}</strong>.`;
+            }
+        }
+
+        // --- Display & Animation Logic ---
+        function displayResults(results) {
+            const tableBody = document.getElementById("resultsTableBody");
+            tableBody.innerHTML = "";
+            results.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                // Add highlight classes for top ranks
+                if (row.Peringkat === 1) tr.classList.add('rank-highlight-1');
+                if (row.Peringkat === 2) tr.classList.add('rank-highlight-2');
+                if (row.Peringkat === 3) tr.classList.add('rank-highlight-3');
+
+                // Staggered animation for each row
+                tr.style.opacity = 0;
+                tr.style.animation = `fadeInUp 0.5s ease-out forwards`;
+                tr.style.animationDelay = `${index * 0.07}s`;
+
+                tr.innerHTML = `
+                    <td class="font-bold text-xl text-slate-200 text-center">${row.Peringkat}</td>
+                    <td class="text-slate-400">${row.Kode}</td>
+                    <td class="font-semibold text-slate-200">${row["Nama Laptop"]}</td>
+                    <td class="font-mono font-bold text-xl text-blue-300">${row["Skor Akhir (V)"].toFixed(4)}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+        
+        // --- Event Listeners ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // Initiate the SAW calculation
+            calculateRanking();
+
+            // Aurora card mouse-following effect
+            const card = document.getElementById('auroraCard');
+            if (card) {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--x', `${x}px`);
+                    card.style.setProperty('--y', `${y}px`);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
